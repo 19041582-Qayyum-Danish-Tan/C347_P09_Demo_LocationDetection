@@ -26,6 +26,7 @@ import com.google.android.gms.tasks.Task;
 public class MainActivity extends AppCompatActivity {
     Button btnGetLastKnowLocation, btnGetLocationUpdate,btnRemoveLocationUpdate;
     FusedLocationProviderClient client;
+    LocationCallback mLocationCallback;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +38,19 @@ public class MainActivity extends AppCompatActivity {
         btnRemoveLocationUpdate = findViewById(R.id.btnRemoveLocationUpdate);
 
         client = LocationServices.getFusedLocationProviderClient(MainActivity.this);
+
+        mLocationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                if (locationResult != null) {
+                    Location data = locationResult.getLastLocation();
+                    double lat = data.getLatitude();
+                    double lng = data.getLongitude();
+
+                    Toast.makeText(MainActivity.this,"New Location Detected\n" + "Lat: " + lat + ", " + " Lat: " + lng, Toast.LENGTH_SHORT).show();
+                }
+            }
+        };
 
         btnGetLastKnowLocation.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -54,7 +68,6 @@ public class MainActivity extends AppCompatActivity {
                             String msg = "No Last Known Location Found";
                             Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
                         }
-
                     }
                 });
             }
@@ -69,18 +82,7 @@ public class MainActivity extends AppCompatActivity {
                 mLocationRequest.setFastestInterval(5000);
                 mLocationRequest.setSmallestDisplacement(100);
 
-                LocationCallback mLocationCallback = new LocationCallback() {
-                    @Override
-                    public void onLocationResult(LocationResult locationResult) {
-                        if (locationResult != null) {
-                            Location data = locationResult.getLastLocation();
-                            double lat = data.getLatitude();
-                            double lng = data.getLongitude();
 
-                            Toast.makeText(MainActivity.this,"New Location Detected\n" + "Lat: " + lat + ", " + " Lat: " + lng, Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                };
                 checkPermission();
                 client.requestLocationUpdates(mLocationRequest, mLocationCallback, null);
             }
@@ -89,7 +91,8 @@ public class MainActivity extends AppCompatActivity {
         btnRemoveLocationUpdate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+//                checkPermission();
+                client.removeLocationUpdates(mLocationCallback);
             }
         });
     }
@@ -108,5 +111,6 @@ public class MainActivity extends AppCompatActivity {
             return false;
         }
     }
+
 
 }
